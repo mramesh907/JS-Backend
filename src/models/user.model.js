@@ -22,7 +22,7 @@ const userSchema = new Schema(
             lowercase: true,         // Store in lowercase for consistency
             trim: true,              // Remove whitespace around the value
         },
-        fullname: {
+        fullName: {
             type: String,           // Set fullname as a string
             required: true,          // Make it a required field
             trim: true,              // Remove whitespace around the value

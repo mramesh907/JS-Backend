@@ -3,11 +3,15 @@ import { ApiError } from "../utils/ApiError.js"
 import { User } from "../models/user.model.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
+// import fs from "fs"
+
 
 const registerUser = asyncHandler(async (req, res) => {
     //    res.status(200).json({
     //         message:"ramesh maity"
     //     })
+
+
     // Steps:-
     // get user details from frontend
     // validations - not empty
@@ -21,7 +25,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
 
     const { fullName, email, username, password } = req.body
-    console.log(`Email : ${email}`)
+
+    // console.log(`Email : ${email}`)
 
     //    if(fullName === ""){
     //     throw new ApiError(400, "Full name is required");
@@ -34,15 +39,23 @@ const registerUser = asyncHandler(async (req, res) => {
     ) {
         throw new ApiError(400, "All fields are required");
     }
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or: [{ username }, { email }]
     })
     if (existedUser) {
+        // fs.unlinkSync(localfilepath)
         throw new ApiError(409, "User already exists");
     }
 
+    // console.log(req.files)
+
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path;
+    // const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
+    let coverImageLocalPath;
+    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+        coverImageLocalPath = req.files.coverImage[0].path;
+    }
 
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar is required");
@@ -50,6 +63,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
     const avatar = await uploadOnCloudinary(avatarLocalPath);
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+
+
 
     if (!avatar) {
         throw new ApiError(400, "Avatar upload failed");
